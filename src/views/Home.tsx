@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { useAppKitAccount } from "@reown/appkit/react";
-import styled from "styled-components";
 import { ethers } from "ethers";
-import {} from "wagmi";
 import { formatUnits, parseUnits } from "viem";
+import { toast } from "react-toastify";
 import { getStakeContract, getTokenContract } from "../blockchain";
 import Addresses from "../blockchain/abi/address.json";
 import eth_img from "../assets/images/eth.png";
 import { formatDate } from "../helper";
-import { toast } from "react-toastify";
+import { HomeContainer, Main } from "./styles";
 
 export const Home = () => {
   const { isConnected, address } = useAppKitAccount();
@@ -34,7 +33,7 @@ export const Home = () => {
   const [histories, setHistories] = useState<ClaimHistory[]>([]);
   const [lastUpdated, setLastUpdated] = useState<number>(0);
 
-  // const tokenPrice = 0.0027;
+  const tokenPrice = 0.0027;
 
   const getGlobalValues = async () => {
     try {
@@ -51,14 +50,12 @@ export const Home = () => {
         _unstakePenaltyPercent,
       ] = await ca.getStakingInfo();
 
-      // const tknName = await tknCA.name();
-      // setTokenName(tknName);
       const tknSymbol = await tknCA.symbol();
       setTokenSymbol(tknSymbol);
       const tknDecimals = await tknCA.decimals();
       setDecimals(tknDecimals);
 
-      setAPYPerDay(_apyPerDay.toNumber());
+      setAPYPerDay(_apyPerDay.toNumber() / 100);
       setLockPeriod(_lockPeriod.toNumber());
       setMinimumStakingAmount(Number(formatUnits(_minimumStakingAmount, 18)));
       setMinimumClaimAmount(Number(formatUnits(_minimumClaimAmount, 18)));
@@ -98,7 +95,6 @@ export const Home = () => {
     } catch (err: any) {
       if (err.message.includes("User is not a holder")) {
         console.log("You are not a holder");
-      } else {
       }
     }
   };
@@ -130,34 +126,44 @@ export const Home = () => {
   const stake = async (amount: string) => {
     try {
       if (!isConnected || !address) {
-        return toast.error("Please connect your wallet first");
+        return toast.error("Please connect your wallet first", {
+          theme: "colored",
+        });
       }
       if (mBalance < Number(amount)) {
         return toast.error(
-          `Balance error. Your token balance is ${mBalance} ${tokenSymbol}`
+          `Balance error. Your token balance is ${mBalance} ${tokenSymbol}`,
+          { theme: "colored" }
         );
       }
-      const provider = new ethers.providers.Web3Provider(window.ethereum!);
-      const signer = provider.getSigner();
-      const ca = await getStakeContract(signer);
-      const token = await getTokenContract(signer);
-      const _amount = parseUnits(amount, decimals);
-      const tx = await token.approve(Addresses.stake, _amount);
-      await tx.wait();
-      const tx2 = await ca.stake(_amount);
-      await tx2.wait();
-      if (tx2) {
-        toast.success("Stake successful!");
-        await getGlobalValues();
-        await getMyInfo();
-        resetValues();
+
+      if (Number(amount) > 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum!);
+        const signer = provider.getSigner();
+        const ca = await getStakeContract(signer);
+        const token = await getTokenContract(signer);
+        const _amount = parseUnits(amount, decimals);
+        const tx = await token.approve(Addresses.stake, _amount);
+        await tx.wait();
+        const tx2 = await ca.stake(_amount);
+        await tx2.wait();
+        if (tx2) {
+          toast.success("Stake successful!", { theme: "colored" });
+          await getGlobalValues();
+          await getMyInfo();
+          resetValues();
+        }
+      } else {
+        toast.error("Invalid amount", { theme: "colored" });
       }
     } catch (Err: any) {
       resetValues();
       if (Err.message.includes("Below minimum staking amount")) {
-        return toast.error("Below minimum staking amount!");
+        return toast.error("Below minimum staking amount!", {
+          theme: "colored",
+        });
       } else {
-        return toast.error("Stake failed");
+        return toast.error("Stake failed", { theme: "colored" });
       }
     }
   };
@@ -165,25 +171,32 @@ export const Home = () => {
   const unstake = async (amount: string) => {
     try {
       if (!isConnected || !address) {
-        return toast.error("Please connect your wallet first");
+        return toast.error("Please connect your wallet first", {
+          theme: "colored",
+        });
       }
-      const provider = new ethers.providers.Web3Provider(window.ethereum!);
-      const signer = provider.getSigner();
-      const ca = await getStakeContract(signer);
-      const tx = await ca.unstake(parseUnits(amount, decimals));
-      await tx.wait();
-      if (tx) {
-        toast.success("Unstake successful!");
-        await getGlobalValues();
-        await getMyInfo();
-        resetValues();
+
+      if (Number(amount) > 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum!);
+        const signer = provider.getSigner();
+        const ca = await getStakeContract(signer);
+        const tx = await ca.unstake(parseUnits(amount, decimals));
+        await tx.wait();
+        if (tx) {
+          toast.success("Unstake successful!", { theme: "colored" });
+          await getGlobalValues();
+          await getMyInfo();
+          resetValues();
+        }
+      } else {
+        return toast.warning("Invalid unstake amount!", { theme: "colored" });
       }
     } catch (Err: any) {
       resetValues();
       if (Err.message.includes("Insufficient staked amount")) {
-        return toast.error("Insufficient staked amount!");
+        return toast.error("Insufficient staked amount!", { theme: "colored" });
       } else {
-        return toast.error("Unstake failed!");
+        return toast.error("Unstake failed!", { theme: "colored" });
       }
     }
   };
@@ -191,28 +204,35 @@ export const Home = () => {
   const claimReward = async (amount: string) => {
     try {
       if (!isConnected || !address) {
-        return toast.error("Please connect your wallet first");
+        return toast.error("Please connect your wallet first", {
+          theme: "colored",
+        });
       }
-      const provider = new ethers.providers.Web3Provider(window.ethereum!);
-      const signer = provider.getSigner();
-      const ca = await getStakeContract(signer);
-      const tx = await ca.claim(parseUnits(amount, 18));
-      await tx.wait();
-      if (tx) {
-        toast.success("Claim successful!");
-        await getMyInfo();
-        resetValues();
+
+      if (Number(amount) > 0) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum!);
+        const signer = provider.getSigner();
+        const ca = await getStakeContract(signer);
+        const tx = await ca.claim(parseUnits(amount, 18));
+        await tx.wait();
+        if (tx) {
+          toast.success("Claim successful!", { theme: "colored" });
+          await getMyInfo();
+          resetValues();
+        }
+      } else {
+        return toast.warning("Invalid claim amount!", { theme: "colored" });
       }
     } catch (Err: any) {
       resetValues();
       if (Err.message.includes("Exceeds reward balance")) {
-        return toast.error("Exceeds reward balance!");
+        return toast.error("Exceeds reward balance!", { theme: "colored" });
       } else if (Err.message.includes("Below minimum claim amount")) {
-        return toast.error("Below minimum claim amount!");
+        return toast.error("Below minimum claim amount!", { theme: "colored" });
       } else if (Err.message.includes("Rewards locked")) {
-        return toast.error("Rewards locked!");
+        return toast.error("Rewards locked!", { theme: "colored" });
       } else {
-        return toast.error("Claim failed!");
+        return toast.error("Claim failed!", { theme: "colored" });
       }
     }
   };
@@ -244,10 +264,11 @@ export const Home = () => {
                     style={{
                       display: "flex",
                       justifyContent: "center",
-                      gap: 10,
+                      alignItems: "center",
+                      gap: 5,
                     }}
                   >
-                    <img src="logo.png" alt="icon" width={20} />
+                    <img src="logo.png" alt="icon" width={15} height={15} />
                     <span>{mBalance}</span>
                   </div>
                 </div>
@@ -281,10 +302,11 @@ export const Home = () => {
                     style={{
                       display: "flex",
                       justifyContent: "center",
-                      gap: 10,
+                      alignItems: "center",
+                      gap: 5,
                     }}
                   >
-                    <img src="logo.png" alt="icon" width={20} />
+                    <img src="logo.png" alt="icon" width={15} height={15} />
                     <span>{mStakedAmount}</span>
                   </div>
                 </div>
@@ -341,10 +363,11 @@ export const Home = () => {
                     style={{
                       display: "flex",
                       justifyContent: "center",
-                      gap: 10,
+                      alignItems: "center",
+                      gap: 5,
                     }}
                   >
-                    <img src={eth_img} alt="icon" width={20} height={20} />
+                    <img src={eth_img} alt="icon" width={15} height={15} />
                     <span>{reward}</span>
                   </div>
                 </div>
@@ -378,6 +401,10 @@ export const Home = () => {
                   {totalStakedAmount} {tokenSymbol}
                 </span>
               </div>
+              <div className="info">
+                <span>TVL</span>
+                <span>${totalStakedAmount * tokenPrice}</span>
+              </div>
             </div>
           </div>
         </section>
@@ -404,350 +431,3 @@ export const Home = () => {
     </HomeContainer>
   );
 };
-
-const HomeContainer = styled.div`
-  position: relative;
-  width: 100%;
-  margin-top: 30px;
-
-  .flex {
-    width: 100%;
-    display: flex;
-    align-items: center;
-  }
-
-  .gap-20 {
-    gap: 20px;
-  }
-
-  .gap-10 {
-    gap: 10px;
-  }
-
-  .token {
-    border: 1px solid var(--pink);
-    border-radius: 15px;
-    padding: 10px 20px;
-    width: auto;
-
-    &:hover {
-      background-color: rgba(96, 32, 160, 0.2);
-      cursor: pointer;
-    }
-    @media screen and (max-width: 768px) {
-      padding: 5px 10px;
-      span {
-        font-size: 14px;
-      }
-    }
-  }
-
-  .token-item {
-    background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
-    padding: 10px 20px;
-    border-radius: 30px;
-    width: 100%;
-    &:hover {
-      opacity: 0.8;
-      cursor: pointer;
-    }
-
-    @media screen and (max-width: 768px) {
-      padding: 5px 10px;
-      img {
-        width: 20px;
-        height: 20px;
-      }
-
-      .token-name {
-        font-size: 16px;
-      }
-    }
-  }
-
-  .wave1,
-  .wave2 {
-    position: absolute;
-    opacity: 0.5;
-    width: 700px;
-    height: auto;
-    @media screen and (max-width: 576px) {
-      width: 100%;
-    }
-  }
-
-  .wave1 {
-    bottom: 0;
-    left: 0;
-    transform: translate(-30%, 50%);
-    /* opacity: .5; */
-  }
-
-  .wave2 {
-    top: 0;
-    right: 0;
-    opacity: 0.5;
-    transform: translate(0, 30%);
-  }
-
-  @media screen and (max-width: 960px) {
-    /* height: calc(100vh - 140px); */
-  }
-`;
-
-const Main = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  color: white;
-  width: 100%;
-  height: 100%;
-
-  section {
-    display: flex;
-    flex-direction: column;
-    width: 700px;
-    background: linear-gradient(
-      180deg,
-      #01011b 23.5%,
-      rgba(96, 32, 160, 0.6) 100%
-    );
-    border-radius: 20px;
-    gap: 30px;
-    padding: 40px;
-    border: 1px solid var(--pink);
-
-    & > div:first-of-type {
-      justify-content: center;
-      .checkbox {
-        position: relative;
-        display: flex;
-        /* background-image: radial-gradient(#6020A0 75%, #006FEE); */
-        width: 300px;
-        height: 60px;
-        border-radius: 30px;
-        border: 1px solid var(--pink);
-        padding: 2px;
-        button {
-          position: absolute;
-          border-radius: 30px;
-          width: 150px;
-          background-color: transparent;
-          border: 1px solid transparent;
-          color: white;
-          font-size: 18px;
-          transition: all 0.3s;
-          cursor: pointer;
-
-          &:first-of-type,
-          &:last-of-type {
-            top: 0;
-            margin: 2px;
-            height: calc(100% - 4px);
-          }
-
-          &:first-of-type {
-            left: 0;
-          }
-
-          &:last-of-type {
-            right: 0;
-          }
-
-          &.active {
-            background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
-          }
-
-          &.active:hover {
-            opacity: 0.8;
-          }
-
-          &:not(.active):hover {
-            background-color: rgba(255, 255, 255, 0.05);
-          }
-
-          @media screen and (max-width: 960px) {
-            width: 150px;
-          }
-
-          @media screen and (max-width: 576px) {
-            width: 125px;
-          }
-        }
-
-        @media screen and (max-width: 960px) {
-          width: 300px;
-          height: 40px;
-        }
-
-        @media screen and (max-width: 576px) {
-          width: 250px;
-        }
-      }
-
-      @media screen and (max-width: 960px) {
-        margin-top: 40px;
-      }
-    }
-
-    .input-box {
-      flex-direction: column;
-      gap: 10px;
-      & > div:first-child {
-        font-weight: bold;
-      }
-      .stake {
-        border: 1px solid var(--pink);
-        width: 100%;
-        height: 100%;
-        border-radius: 30px;
-        padding: 10px;
-        input {
-          width: 90%;
-          height: 100%;
-          background-color: transparent;
-          outline: none;
-          border: none;
-          color: white;
-          font-size: 30px;
-          padding: 15px;
-
-          @media screen and (max-width: 960px) {
-            width: 100%;
-          }
-        }
-
-        & > div {
-          position: relative;
-          padding: 10px;
-          height: 100%;
-          gap: 10px;
-
-          & > div {
-            flex-direction: column;
-            align-items: flex-end;
-            font-weight: bold;
-            & > span:first-of-type {
-              font-size: 20px;
-              @media screen and (max-width: 960px) {
-                font-size: 16px;
-              }
-            }
-
-            & span {
-              color: gray;
-            }
-
-            @media screen and (max-width: 960px) {
-              align-items: center;
-              width: auto;
-            }
-          }
-          & > img:last-child {
-            position: absolute;
-            right: 10px;
-            @media screen and (max-width: 960px) {
-              right: 30px;
-            }
-          }
-
-          &:hover {
-            opacity: 0.8;
-          }
-
-          @media screen and (max-width: 960px) {
-            width: 100%;
-            justify-content: center;
-            padding: 0;
-          }
-        }
-
-        @media screen and (max-width: 960px) {
-          flex-direction: column;
-        }
-      }
-
-      .stake-info {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        gap: 10px;
-        & .info {
-          width: 100%;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-
-          & span {
-            font-size: 12px;
-          }
-        }
-      }
-    }
-
-    .arrow-down {
-      justify-content: center;
-      & > div {
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        background: linear-gradient(
-          0,
-          #01011b 23.5%,
-          rgba(96, 32, 160, 0.6) 100%
-        );
-        border-radius: 12px;
-        margin-bottom: -20px;
-      }
-    }
-    .input-addr {
-      input {
-        width: 100%;
-        padding: 20px;
-        background-color: transparent;
-        border: 1px solid var(--pink);
-        border-radius: 30px;
-        font-size: 20px;
-        color: white;
-        outline: none;
-      }
-    }
-
-    .swap-btn {
-      width: 100%;
-      margin-top: 20px;
-      justify-content: center;
-      button {
-        background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
-        width: 50%;
-        padding: 15px 0;
-        border-radius: 30px;
-        color: white;
-        outline: none;
-        font-size: 20px;
-        border: none;
-
-        &:hover {
-          opacity: 0.8;
-          cursor: pointer;
-        }
-        @media screen and (max-width: 960px) {
-          width: 100%;
-        }
-      }
-    }
-
-    @media screen and (max-width: 960px) {
-      width: 550px;
-      gap: 15px;
-    }
-
-    @media screen and (max-width: 768px) {
-      width: calc(100% - 40px);
-      margin: 0 20px;
-    }
-  }
-`;
