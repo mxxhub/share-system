@@ -283,6 +283,7 @@ export const Admin = () => {
                 type="number"
                 placeholder={apyPerDay.toString()}
                 value={newAPY}
+                min={0}
                 onChange={(e) => setNewAPY(Number(e.target.value))}
               />
               <div className="swap-btn">
@@ -339,6 +340,7 @@ export const Admin = () => {
                 type="number"
                 placeholder={lockPeriod.toString()}
                 value={newLockPeriod}
+                min={0}
                 onChange={(e) => setNewLockPeriod(Number(e.target.value))}
               />
               <div className="swap-btn">
@@ -354,6 +356,7 @@ export const Admin = () => {
                 type="number"
                 placeholder={unstakePenaltyPercent.toString()}
                 value={newUnstakePenaltyPercentage}
+                min={0}
                 onChange={(e) =>
                   setNewUnstakePenaltyPercentage(Number(e.target.value))
                 }
