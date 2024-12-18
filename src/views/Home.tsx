@@ -239,7 +239,7 @@ export const Home = () => {
   return (
     <HomeContainer>
       <Main>
-        <h1>TKN Staking</h1>
+        <h2>Swap AI Revenue Share System</h2>
         <section>
           <div className="flex input-box">
             <div className="flex gap-20">
@@ -345,7 +345,7 @@ export const Home = () => {
             </div>
           </div>
         </section>
-        <h1>Revenue Earned</h1>
+        <h2>Revenue Earned</h2>
         <section>
           <div className="flex input-box">
             <div className="flex stake">
@@ -408,7 +408,7 @@ export const Home = () => {
             </div>
           </div>
         </section>
-        <h1>Revenue Claim History</h1>
+        <h2>Revenue Claim History</h2>
         <section>
           {histories.length > 0 ? (
             <div className="flex input-box">

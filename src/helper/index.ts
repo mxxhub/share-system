@@ -75,3 +75,10 @@ export function formatDate(dateParam: any) {
   }
   return getFormattedDate(date); // 10. January 2017. at 10:20
 }
+
+export const numberWithCommas = (x: number) => {
+  x = Number(Number(x).toFixed(3));
+  var parts = x.toString().split(".");
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return parts.join(".");
+};
