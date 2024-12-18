@@ -1,10 +1,67 @@
 import styled from "styled-components";
 
+export const HeaderStyle = styled.header`
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  a {
+    text-decoration: none;
+    color: white;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    img {
+      width: 40px;
+      height: 40px;
+    }
+
+    @media screen and (max-width: 960px) {
+      width: auto;
+      span {
+        display: none;
+      }
+    }
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    button {
+      background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
+      padding: 15px 30px;
+      border-radius: 30px;
+      color: white;
+      outline: none;
+      font-size: 20px;
+      border: none;
+
+      &:hover {
+        opacity: 0.8;
+        cursor: pointer;
+      }
+      @media screen and (max-width: 960px) {
+        width: 100%;
+        font-size: 16px;
+      }
+    }
+    @media screen and (max-width: 960px) {
+    }
+  }
+
+  @media screen and (max-width: 960px) {
+    /* height: 140px; */
+  }
+`;
+
 export const HomeContainer = styled.div`
   position: relative;
   width: 100%;
-  margin-top: 30px;
-
+  padding-top: 30px;
+  min-height: 100vh;
   .flex {
     width: 100%;
     display: flex;
@@ -91,14 +148,49 @@ export const HomeContainer = styled.div`
 `;
 
 export const Main = styled.div`
+  width: 100vw;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 40px;
   color: white;
   width: 100%;
   height: 100%;
+
+  .main-info {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+  }
+
+  .static-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .info {
+      width: 33.33%;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 calc(33.33%);
+      justify-content: space-between;
+      align-items: left;
+
+      & h1 {
+        font-size: 3rem;
+      }
+
+      @media screen and (max-width: 960px) {
+        width: 300px;
+        height: 40px;
+      }
+
+      @media screen and (max-width: 576px) {
+        width: 250px;
+      }
+    }
+  }
 
   section {
     display: flex;

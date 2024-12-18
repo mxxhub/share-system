@@ -21,7 +21,6 @@ export const Home = () => {
   const [lockPeriod, setLockPeriod] = useState<number>(0);
   const [minimumStakingAmount, setMinimumStakingAmount] = useState<number>(0);
   const [minimumClaimAmount, setMinimumClaimAmount] = useState<number>(0);
-  const [unstakePenaltyPercent, setUnstakePenaltyPercent] = useState<number>(0);
   const [totalETH, setTotalETH] = useState<number>(0);
   const [holders, setHolders] = useState<number>(0);
   const [totalStakedAmount, setTotalStakedAmount] = useState<number>(0);
@@ -59,7 +58,6 @@ export const Home = () => {
       setLockPeriod(_lockPeriod.toNumber());
       setMinimumStakingAmount(Number(formatUnits(_minimumStakingAmount, 18)));
       setMinimumClaimAmount(Number(formatUnits(_minimumClaimAmount, 18)));
-      setUnstakePenaltyPercent(_unstakePenaltyPercent.toNumber());
       setTotalETH(Number(formatUnits(_totalETH, 18)));
       setHolders(_holders.toNumber());
       setTotalStakedAmount(Number(formatUnits(_totalStakedAmount, 18)));
@@ -132,7 +130,7 @@ export const Home = () => {
       }
       if (mBalance < Number(amount)) {
         return toast.error(
-          `Balance error. Your token balance is ${mBalance} ${tokenSymbol}`,
+          `Balance error. Your balance is ${mBalance} ${tokenSymbol}`,
           { theme: "colored" }
         );
       }
@@ -148,7 +146,7 @@ export const Home = () => {
         const tx2 = await ca.stake(_amount);
         await tx2.wait();
         if (tx2) {
-          toast.success("Stake successful!", { theme: "colored" });
+          toast.success("Joined successfully!", { theme: "colored" });
           await getGlobalValues();
           await getMyInfo();
           resetValues();
@@ -158,12 +156,12 @@ export const Home = () => {
       }
     } catch (Err: any) {
       resetValues();
-      if (Err.message.includes("Below minimum staking amount")) {
-        return toast.error("Below minimum staking amount!", {
+      if (Err.message.includes("Below minimum joining amount")) {
+        return toast.error("Below minimum joining amount!", {
           theme: "colored",
         });
       } else {
-        return toast.error("Stake failed", { theme: "colored" });
+        return toast.error("Join failed", { theme: "colored" });
       }
     }
   };
@@ -183,20 +181,22 @@ export const Home = () => {
         const tx = await ca.unstake(parseUnits(amount, decimals));
         await tx.wait();
         if (tx) {
-          toast.success("Unstake successful!", { theme: "colored" });
+          toast.success("Left successfully!", { theme: "colored" });
           await getGlobalValues();
           await getMyInfo();
           resetValues();
         }
       } else {
-        return toast.warning("Invalid unstake amount!", { theme: "colored" });
+        return toast.warning("Invalid leaving amount!", { theme: "colored" });
       }
     } catch (Err: any) {
       resetValues();
       if (Err.message.includes("Insufficient staked amount")) {
-        return toast.error("Insufficient staked amount!", { theme: "colored" });
+        return toast.error("Insufficient leaving amount!", {
+          theme: "colored",
+        });
       } else {
-        return toast.error("Unstake failed!", { theme: "colored" });
+        return toast.error("Leaving failed!", { theme: "colored" });
       }
     }
   };
@@ -216,7 +216,7 @@ export const Home = () => {
         const tx = await ca.claim(parseUnits(amount, 18));
         await tx.wait();
         if (tx) {
-          toast.success("Claim successful!", { theme: "colored" });
+          toast.success("Claimed successfully!", { theme: "colored" });
           await getMyInfo();
           resetValues();
         }
@@ -239,196 +239,245 @@ export const Home = () => {
   return (
     <HomeContainer>
       <Main>
-        <h2>Swap AI Revenue Share System</h2>
-        <section>
-          <div className="flex input-box">
-            <div className="flex gap-20">
-              <span>Stake</span>
-              <div className="flex gap-10">
-                <img src="logo.png" alt="icon" width={20} />
-                <span>TKN</span>
-              </div>
+        <h2>Swap AI Revenue Share Program</h2>
+        <div className="main-info">
+          <div className="static-info">
+            <div className="info">
+              <h1>Total Joiners</h1>
+              <h1>{numberWithCommas(holders)}</h1>
             </div>
-            <div className="flex stake">
-              <input
-                type="number"
-                placeholder="0.0"
-                min={0}
-                value={inputStake}
-                onChange={(e) => setInputStake(Number(e.target.value))}
-              />
-              <div className="flex">
-                <div className="flex">
-                  <span>Balance</span>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 5,
-                    }}
-                  >
-                    <img src="logo.png" alt="icon" width={15} height={15} />
-                    <span>{numberWithCommas(mBalance)}</span>
-                  </div>
-                </div>
-              </div>
+            <div className="info">
+              <h1>Total Distributed</h1>
+              <h1>{numberWithCommas(totalETH)} ETH</h1>
             </div>
-            <div className="swap-btn">
-              <button onClick={() => stake(inputStake.toString())}>
-                Stake
-              </button>
+            <div className="info">
+              <h1>Total Joined</h1>
+              <h1>{numberWithCommas(totalStakedAmount)}</h1>
             </div>
-            <div className="flex gap-20" style={{ marginTop: "20px" }}>
-              <span>Unstake</span>
-              <div className="flex gap-10">
-                <img src="logo.png" alt="icon" width={20} />
-                <span>TKN</span>
-              </div>
+          </div>
+          <div className="static-info">
+            <div className="info">
+              <h1>TVL</h1>
+              <h1>${numberWithCommas(totalStakedAmount * tokenPrice)}</h1>
             </div>
+            <div className="info">
+              <h1>APY Per Minute</h1>
+              <h1>{apyPerDay} %</h1>
+            </div>
+            <div className="info">
+              <h1>Lock Period</h1>
+              <h1>{lockPeriod} minutes </h1>
+            </div>
+          </div>
+        </div>
 
-            <div className="flex stake">
-              <input
-                type="number"
-                placeholder="0.0"
-                min={0}
-                value={inputUnstake}
-                onChange={(e) => setInputUnstake(Number(e.target.value))}
-              />
-              <div className="flex">
-                <div className="flex">
-                  <span>Staked</span>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 5,
-                    }}
-                  >
-                    <img src="logo.png" alt="icon" width={15} height={15} />
-                    <span>{numberWithCommas(mStakedAmount)}</span>
+        {isConnected && address && (
+          <>
+            <h3>Join Revenue Share Program</h3>
+            <section>
+              <div className="flex input-box">
+                <div className="flex stake">
+                  <input
+                    type="number"
+                    placeholder="0.0"
+                    min={0}
+                    value={inputStake}
+                    onChange={(e) => setInputStake(Number(e.target.value))}
+                  />
+                  <div className="flex">
+                    <div className="flex">
+                      <span>Balance</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <img src="logo.png" alt="icon" width={15} height={15} />
+                        <span>{numberWithCommas(mBalance)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="swap-btn">
+                  <button onClick={() => stake(inputStake.toString())}>
+                    Join
+                  </button>
+                </div>
+
+                <div className="stake-info">
+                  <div className="info">
+                    <span>APY Per Minute</span>
+                    <span>{apyPerDay}%</span>
+                  </div>
+                  <div className="info">
+                    <span>Lock Period</span>
+                    <span>{lockPeriod} minutes</span>
+                  </div>
+                  <div className="info">
+                    <span>Minimum Stake Amount</span>
+                    <span>{`${numberWithCommas(
+                      minimumStakingAmount
+                    )} ${tokenSymbol}`}</span>
+                  </div>
+                  <div className="info">
+                    <span>Minimum Claim Amount</span>
+                    <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
+                  </div>
+                  <div className="info">
+                    <span>Total Joiners</span>
+                    <span>{numberWithCommas(holders)}</span>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="swap-btn">
-              <button onClick={() => unstake(inputUnstake.toString())}>
-                Unstake
-              </button>
-            </div>
-            <div className="stake-info">
-              <div className="info">
-                <span>APY Per Minute</span>
-                <span>{apyPerDay}%</span>
-              </div>
-              <div className="info">
-                <span>Lock Period</span>
-                <span>{lockPeriod} minutes</span>
-              </div>
-              <div className="info">
-                <span>Minimum Stake Amount</span>
-                <span>{`${numberWithCommas(
-                  minimumStakingAmount
-                )} ${tokenSymbol}`}</span>
-              </div>
-              <div className="info">
-                <span>Minimum Claim Amount</span>
-                <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
-              </div>
-              <div className="info">
-                <span>Unstake Penalty Percentage</span>
-                <span>{unstakePenaltyPercent}%</span>
-              </div>
-              <div className="info">
-                <span>Total Stakers</span>
-                <span>{numberWithCommas(holders)}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <h2>Revenue Earned</h2>
-        <section>
-          <div className="flex input-box">
-            <div className="flex stake">
-              <input
-                type="number"
-                placeholder="0.0"
-                min={0}
-                value={inputClaim}
-                onChange={(e) => setInputClaim(Number(e.target.value))}
-              />
-              <div className="flex">
-                <div className="flex">
-                  <span>Claimable</span>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: 5,
-                    }}
-                  >
-                    <img src={eth_img} alt="icon" width={15} height={15} />
-                    <span>{numberWithCommas(reward)}</span>
+            </section>
+            <h3>Leave Revenue Share Program</h3>
+            <section>
+              <div className="flex input-box">
+                <div className="flex stake">
+                  <input
+                    type="number"
+                    placeholder="0.0"
+                    min={0}
+                    value={inputUnstake}
+                    onChange={(e) => setInputUnstake(Number(e.target.value))}
+                  />
+                  <div className="flex">
+                    <div className="flex">
+                      <span>Balance</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <img src="logo.png" alt="icon" width={15} height={15} />
+                        <span>{numberWithCommas(mStakedAmount)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="swap-btn">
+                  <button onClick={() => unstake(inputUnstake.toString())}>
+                    Leave
+                  </button>
+                </div>
+                <div className="stake-info">
+                  <div className="info">
+                    <span>APY Per Minute</span>
+                    <span>{apyPerDay}%</span>
+                  </div>
+                  <div className="info">
+                    <span>Lock Period</span>
+                    <span>{lockPeriod} minutes</span>
+                  </div>
+                  <div className="info">
+                    <span>Minimum Stake Amount</span>
+                    <span>{`${numberWithCommas(
+                      minimumStakingAmount
+                    )} ${tokenSymbol}`}</span>
+                  </div>
+                  <div className="info">
+                    <span>Minimum Claim Amount</span>
+                    <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
+                  </div>
+                  <div className="info">
+                    <span>Total Joiners</span>
+                    <span>{numberWithCommas(holders)}</span>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="swap-btn">
-              <button onClick={() => claimReward(inputClaim.toString())}>
-                Claim
-              </button>
-            </div>
-            <div className="stake-info">
-              <div className="info">
-                <span>Current Score</span>
-                <span>{numberWithCommas(mScore)}</span>
-              </div>
-              <div className="info">
-                <span>Last Staked</span>
-                <span>{formatDate(lastUpdated)}</span>
-              </div>
-              <div className="info">
-                <span>Elapse Days</span>
-                <span>{elapsedDays} minutes</span>
-              </div>
-              <div className="info">
-                <span>Total Distributed ETH</span>
-                <span>{totalETH} ETH</span>
-              </div>
-              <div className="info">
-                <span>Total Staked TKN</span>
-                <span>
-                  {numberWithCommas(totalStakedAmount)} {tokenSymbol}
-                </span>
-              </div>
-              <div className="info">
-                <span>TVL</span>
-                <span>${numberWithCommas(totalStakedAmount * tokenPrice)}</span>
-              </div>
-            </div>
-          </div>
-        </section>
-        <h2>Revenue Claim History</h2>
-        <section>
-          {histories.length > 0 ? (
-            <div className="flex input-box">
-              <div className="stake-info">
-                {histories.map((history: ClaimHistory, idx: number) => (
-                  <div key={idx} className="info">
-                    <span>{formatDate(history.timestamp)}</span>
-                    <span>{numberWithCommas(history.amount)} ETH</span>
+            </section>
+            <h3>Revenue Earned</h3>
+            <section>
+              <div className="flex input-box">
+                <div className="flex stake">
+                  <input
+                    type="number"
+                    placeholder="0.0"
+                    min={0}
+                    value={inputClaim}
+                    onChange={(e) => setInputClaim(Number(e.target.value))}
+                  />
+                  <div className="flex">
+                    <div className="flex">
+                      <span>Balance</span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <img src={eth_img} alt="icon" width={15} height={15} />
+                        <span>{numberWithCommas(reward)}</span>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                </div>
+                <div className="swap-btn">
+                  <button onClick={() => claimReward(inputClaim.toString())}>
+                    Claim
+                  </button>
+                </div>
+                <div className="stake-info">
+                  <div className="info">
+                    <span>Current Score</span>
+                    <span>{numberWithCommas(mScore)}</span>
+                  </div>
+                  <div className="info">
+                    <span>Last Joined</span>
+                    <span>{formatDate(lastUpdated)}</span>
+                  </div>
+                  <div className="info">
+                    <span>Elapse Days</span>
+                    <span>{elapsedDays} minutes</span>
+                  </div>
+                  <div className="info">
+                    <span>Total Distributed ETH</span>
+                    <span>{totalETH} ETH</span>
+                  </div>
+                  <div className="info">
+                    <span>Total Joined {tokenSymbol}</span>
+                    <span>
+                      {numberWithCommas(totalStakedAmount)} {tokenSymbol}
+                    </span>
+                  </div>
+                  <div className="info">
+                    <span>TVL</span>
+                    <span>
+                      ${numberWithCommas(totalStakedAmount * tokenPrice)}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex input-box">
-              <h2>No Staked Data</h2>
-            </div>
-          )}
-        </section>
+            </section>
+            <h2>Revenue Claim History</h2>
+            <section>
+              {histories.length > 0 ? (
+                <div className="flex input-box">
+                  <div className="stake-info">
+                    {histories.map((history: ClaimHistory, idx: number) => (
+                      <div key={idx} className="info">
+                        <span>{formatDate(history.timestamp)}</span>
+                        <span>{numberWithCommas(history.amount)} ETH</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex input-box">
+                  <h2>No Staked Data</h2>
+                </div>
+              )}
+            </section>
+          </>
+        )}
       </Main>
     </HomeContainer>
   );

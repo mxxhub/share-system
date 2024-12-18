@@ -4,8 +4,8 @@ import {
   useDisconnect,
 } from "@reown/appkit/react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
 import { formatAddress } from "../../helper";
+import { HeaderStyle } from "../styles";
 
 export const Header = () => {
   const { open } = useAppKit();
@@ -33,62 +33,3 @@ export const Header = () => {
     </HeaderStyle>
   );
 };
-
-const HeaderStyle = styled.header`
-  position: relative;
-  left: 0;
-  top: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  a {
-    text-decoration: none;
-    color: white;
-  }
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    img {
-      width: 40px;
-      height: 40px;
-    }
-
-    @media screen and (max-width: 960px) {
-      width: auto;
-      span {
-        display: none;
-      }
-    }
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    button {
-      background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
-      padding: 15px 30px;
-      border-radius: 30px;
-      color: white;
-      outline: none;
-      font-size: 20px;
-      border: none;
-
-      &:hover {
-        opacity: 0.8;
-        cursor: pointer;
-      }
-      @media screen and (max-width: 960px) {
-        width: 100%;
-        font-size: 16px;
-      }
-    }
-    @media screen and (max-width: 960px) {
-    }
-  }
-
-  @media screen and (max-width: 960px) {
-    /* height: 140px; */
-  }
-`;
