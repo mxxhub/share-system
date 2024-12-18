@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { getStakeContract, getTokenContract } from "../blockchain";
 import Addresses from "../blockchain/abi/address.json";
 import eth_img from "../assets/images/eth.png";
-import { formatDate } from "../helper";
+import { formatDate, numberWithCommas } from "../helper";
 import { HomeContainer, Main } from "./styles";
 
 export const Home = () => {
@@ -269,7 +269,7 @@ export const Home = () => {
                     }}
                   >
                     <img src="logo.png" alt="icon" width={15} height={15} />
-                    <span>{mBalance}</span>
+                    <span>{numberWithCommas(mBalance)}</span>
                   </div>
                 </div>
               </div>
@@ -307,7 +307,7 @@ export const Home = () => {
                     }}
                   >
                     <img src="logo.png" alt="icon" width={15} height={15} />
-                    <span>{mStakedAmount}</span>
+                    <span>{numberWithCommas(mStakedAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -328,11 +328,13 @@ export const Home = () => {
               </div>
               <div className="info">
                 <span>Minimum Stake Amount</span>
-                <span>{`${minimumStakingAmount} ${tokenSymbol}`}</span>
+                <span>{`${numberWithCommas(
+                  minimumStakingAmount
+                )} ${tokenSymbol}`}</span>
               </div>
               <div className="info">
                 <span>Minimum Claim Amount</span>
-                <span>{`${minimumClaimAmount} ETH`}</span>
+                <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
               </div>
               <div className="info">
                 <span>Unstake Penalty Percentage</span>
@@ -340,7 +342,7 @@ export const Home = () => {
               </div>
               <div className="info">
                 <span>Total Stakers</span>
-                <span>{holders}</span>
+                <span>{numberWithCommas(holders)}</span>
               </div>
             </div>
           </div>
@@ -368,7 +370,7 @@ export const Home = () => {
                     }}
                   >
                     <img src={eth_img} alt="icon" width={15} height={15} />
-                    <span>{reward}</span>
+                    <span>{numberWithCommas(reward)}</span>
                   </div>
                 </div>
               </div>
@@ -381,7 +383,7 @@ export const Home = () => {
             <div className="stake-info">
               <div className="info">
                 <span>Current Score</span>
-                <span>{mScore}</span>
+                <span>{numberWithCommas(mScore)}</span>
               </div>
               <div className="info">
                 <span>Last Staked</span>
@@ -398,12 +400,12 @@ export const Home = () => {
               <div className="info">
                 <span>Total Staked TKN</span>
                 <span>
-                  {totalStakedAmount} {tokenSymbol}
+                  {numberWithCommas(totalStakedAmount)} {tokenSymbol}
                 </span>
               </div>
               <div className="info">
                 <span>TVL</span>
-                <span>${totalStakedAmount * tokenPrice}</span>
+                <span>${numberWithCommas(totalStakedAmount * tokenPrice)}</span>
               </div>
             </div>
           </div>
@@ -416,7 +418,7 @@ export const Home = () => {
                 {histories.map((history: ClaimHistory, idx: number) => (
                   <div key={idx} className="info">
                     <span>{formatDate(history.timestamp)}</span>
-                    <span>{history.amount} ETH</span>
+                    <span>{numberWithCommas(history.amount)} ETH</span>
                   </div>
                 ))}
               </div>
