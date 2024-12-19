@@ -36,10 +36,10 @@ function getFormattedDate(
     return `${prefomattedDate} at ${hours}:${minutes}`;
   }
   if (hideYear) {
-    return `${day}. ${month} at ${hours}:${minutes}`;
+    return `${day}, ${month} at ${hours}:${minutes}`;
   }
   // 10. January 2017. at 10:20
-  return `${day}. ${month} ${year}. at ${hours}:${minutes}`;
+  return `${day}, ${month} ${year}, at ${hours}:${minutes}`;
 }
 
 export function formatDate(dateParam: any) {

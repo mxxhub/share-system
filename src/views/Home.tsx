@@ -239,41 +239,37 @@ export const Home = () => {
   return (
     <HomeContainer>
       <Main>
-        <h2>Swap AI Revenue Share Program</h2>
-        <div className="main-info">
-          <div className="static-info">
-            <div className="info">
-              <h1>Total Joiners</h1>
-              <h1>{numberWithCommas(holders)}</h1>
-            </div>
-            <div className="info">
-              <h1>Total Distributed</h1>
-              <h1>{numberWithCommas(totalETH)} ETH</h1>
-            </div>
-            <div className="info">
-              <h1>Total Joined</h1>
-              <h1>{numberWithCommas(totalStakedAmount)}</h1>
-            </div>
+        <h1>Swap AI Revenue Share Program</h1>
+        <div className="static-info">
+          <div className="info">
+            <h1>Total Joiners</h1>
+            <h1>{numberWithCommas(holders)}</h1>
           </div>
-          <div className="static-info">
-            <div className="info">
-              <h1>TVL</h1>
-              <h1>${numberWithCommas(totalStakedAmount * tokenPrice)}</h1>
-            </div>
-            <div className="info">
-              <h1>APY Per Minute</h1>
-              <h1>{apyPerDay} %</h1>
-            </div>
-            <div className="info">
-              <h1>Lock Period</h1>
-              <h1>{lockPeriod} minutes </h1>
-            </div>
+          <div className="info">
+            <h1>Total Distributed</h1>
+            <h1>{numberWithCommas(totalETH)} ETH</h1>
+          </div>
+          <div className="info">
+            <h1>Total Joined</h1>
+            <h1>{numberWithCommas(totalStakedAmount)}</h1>
+          </div>
+          <div className="info">
+            <h1>TVL</h1>
+            <h1>${numberWithCommas(totalStakedAmount * tokenPrice)}</h1>
+          </div>
+          <div className="info">
+            <h1>APY Per Minute</h1>
+            <h1>{apyPerDay} %</h1>
+          </div>
+          <div className="info">
+            <h1>Lock Period</h1>
+            <h1>{lockPeriod} minutes </h1>
           </div>
         </div>
 
-        {isConnected && address && (
+        {isConnected && address ? (
           <>
-            <h3>Join Revenue Share Program</h3>
+            <h2>Join Revenue Share Program</h2>
             <section>
               <div className="flex input-box">
                 <div className="flex stake">
@@ -286,7 +282,9 @@ export const Home = () => {
                   />
                   <div className="flex">
                     <div className="flex">
-                      <span>Balance</span>
+                      <span onClick={() => setInputStake(Number(mBalance))}>
+                        Balance
+                      </span>
                       <div
                         style={{
                           display: "flex",
@@ -313,27 +311,19 @@ export const Home = () => {
                     <span>{apyPerDay}%</span>
                   </div>
                   <div className="info">
-                    <span>Lock Period</span>
-                    <span>{lockPeriod} minutes</span>
-                  </div>
-                  <div className="info">
-                    <span>Minimum Stake Amount</span>
+                    <span>Minimum Join Amount</span>
                     <span>{`${numberWithCommas(
                       minimumStakingAmount
                     )} ${tokenSymbol}`}</span>
                   </div>
                   <div className="info">
-                    <span>Minimum Claim Amount</span>
-                    <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
-                  </div>
-                  <div className="info">
-                    <span>Total Joiners</span>
-                    <span>{numberWithCommas(holders)}</span>
+                    <span>Last Joined</span>
+                    <span>{formatDate(lastUpdated)}</span>
                   </div>
                 </div>
               </div>
             </section>
-            <h3>Leave Revenue Share Program</h3>
+            <h2>Leave Revenue Share Program</h2>
             <section>
               <div className="flex input-box">
                 <div className="flex stake">
@@ -346,7 +336,9 @@ export const Home = () => {
                   />
                   <div className="flex">
                     <div className="flex">
-                      <span>Balance</span>
+                      <span onClick={() => setInputUnstake(mStakedAmount)}>
+                        Balance
+                      </span>
                       <div
                         style={{
                           display: "flex",
@@ -368,31 +360,19 @@ export const Home = () => {
                 </div>
                 <div className="stake-info">
                   <div className="info">
-                    <span>APY Per Minute</span>
-                    <span>{apyPerDay}%</span>
+                    <span>Total Joined {tokenSymbol}</span>
+                    <span>
+                      {numberWithCommas(totalStakedAmount)} {tokenSymbol}
+                    </span>
                   </div>
                   <div className="info">
-                    <span>Lock Period</span>
-                    <span>{lockPeriod} minutes</span>
-                  </div>
-                  <div className="info">
-                    <span>Minimum Stake Amount</span>
-                    <span>{`${numberWithCommas(
-                      minimumStakingAmount
-                    )} ${tokenSymbol}`}</span>
-                  </div>
-                  <div className="info">
-                    <span>Minimum Claim Amount</span>
-                    <span>{`${numberWithCommas(minimumClaimAmount)} ETH`}</span>
-                  </div>
-                  <div className="info">
-                    <span>Total Joiners</span>
-                    <span>{numberWithCommas(holders)}</span>
+                    <span>Current Score</span>
+                    <span>{numberWithCommas(mScore)}</span>
                   </div>
                 </div>
               </div>
             </section>
-            <h3>Revenue Earned</h3>
+            <h2>Revenue Earned</h2>
             <section>
               <div className="flex input-box">
                 <div className="flex stake">
@@ -405,7 +385,7 @@ export const Home = () => {
                   />
                   <div className="flex">
                     <div className="flex">
-                      <span>Balance</span>
+                      <span onClick={() => setInputClaim(reward)}>Balance</span>
                       <div
                         style={{
                           display: "flex",
@@ -427,6 +407,10 @@ export const Home = () => {
                 </div>
                 <div className="stake-info">
                   <div className="info">
+                    <span>Minimum Claim Amount</span>
+                    <span>{numberWithCommas(minimumClaimAmount)} ETH</span>
+                  </div>
+                  <div className="info">
                     <span>Current Score</span>
                     <span>{numberWithCommas(mScore)}</span>
                   </div>
@@ -437,22 +421,6 @@ export const Home = () => {
                   <div className="info">
                     <span>Elapse Days</span>
                     <span>{elapsedDays} minutes</span>
-                  </div>
-                  <div className="info">
-                    <span>Total Distributed ETH</span>
-                    <span>{totalETH} ETH</span>
-                  </div>
-                  <div className="info">
-                    <span>Total Joined {tokenSymbol}</span>
-                    <span>
-                      {numberWithCommas(totalStakedAmount)} {tokenSymbol}
-                    </span>
-                  </div>
-                  <div className="info">
-                    <span>TVL</span>
-                    <span>
-                      ${numberWithCommas(totalStakedAmount * tokenPrice)}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -477,6 +445,10 @@ export const Home = () => {
               )}
             </section>
           </>
+        ) : (
+          <div className="connect-wallet">
+            Connect Your Wallet To Start Revenue Share Program
+          </div>
         )}
       </Main>
     </HomeContainer>

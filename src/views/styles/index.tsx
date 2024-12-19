@@ -157,37 +157,53 @@ export const Main = styled.div`
   width: 100%;
   height: 100%;
 
-  .main-info {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 4rem;
+  .connect-wallet {
+    font-size: 20px;
+    background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
+    color: white;
+    padding: 20px 40px;
+    font-weight: 600;
+    border-radius: 40px;
   }
 
   .static-info {
+    width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
-
+    flex: auto;
+    gap: 20px;
     .info {
-      width: 33.33%;
+      background: linear-gradient(
+        120deg,
+        #01011b 23.5%,
+        rgba(96, 32, 160, 0.6) 100%
+      );
+      border: 1px solid var(--pink);
+      border-radius: 20px;
       display: flex;
+      flex: 1 33.33%;
       flex-direction: column;
-      flex: 1 1 calc(33.33%);
       justify-content: space-between;
       align-items: left;
 
       & h1 {
-        font-size: 3rem;
+        font-size: 2.5rem;
+        @media screen and (max-width: 960px) {
+          font-size: 2.5rem;
+        }
+
+        @media screen and (max-width: 576px) {
+          font-size: 2rem;
+        }
       }
 
       @media screen and (max-width: 960px) {
-        width: 300px;
-        height: 40px;
+        flex: 1 50%;
       }
 
       @media screen and (max-width: 576px) {
-        width: 250px;
+        flex: 1 100%;
       }
     }
   }
@@ -323,8 +339,20 @@ export const Main = styled.div`
               }
             }
 
-            & span {
+            & > span:first-of-type {
+              padding: 5px 15px;
               color: gray;
+              &:hover {
+                cursor: pointer;
+                color: white;
+                background-color: var(--pink);
+                border-radius: 20px;
+              }
+            }
+
+            & span:last-of-type {
+              color: gray;
+              padding-right: 15px;
             }
 
             @media screen and (max-width: 960px) {
@@ -369,7 +397,7 @@ export const Main = styled.div`
           justify-content: space-between;
 
           & span {
-            font-size: 12px;
+            font-size: 16px;
           }
         }
       }
