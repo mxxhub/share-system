@@ -23,7 +23,7 @@ export const Header = () => {
     <HeaderStyle>
       <Link to="/" className="logo">
         <img src="logo.png" alt="logo" />
-        <span style={{ fontSize: "20px" }}>Swap AI</span>
+        <span style={{ fontSize: "20px" }}>Swap AI Rev Share</span>
       </Link>
       <div className="nav-right">
         <button type="button" onClick={handleWallet}>
