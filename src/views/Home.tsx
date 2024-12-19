@@ -76,11 +76,16 @@ export const Home = () => {
       setMBalance(Number(formatUnits(balance, 18)));
       const ca = await getStakeContract();
       const [_user, _score, _elapseDays] = await ca.getStakerInfo(address);
-      setMScore(Number(formatUnits(_score, 18)));
       if (Number(formatUnits(_user.amount, 18)) > 0) {
         setMStakedAmount(Number(formatUnits(_user.amount, 18)));
         setReward(Number(formatUnits(_user.reward, 18)));
         setElapsedDays(_elapseDays.toNumber());
+        setMScore(
+          _elapseDays.toNumber() > lockPeriod
+            ? Number(formatUnits(_score, 18)) +
+                Number(formatUnits(_user.amount, 18))
+            : Number(formatUnits(_score, 18))
+        );
         setLastUpdated(_user.lastUpdated.toNumber());
         let arr: ClaimHistory[] = [];
         for (let i = 0; i < _user.histories.length; i++) {
@@ -422,7 +427,7 @@ export const Home = () => {
                   </div>
                   <div className="info">
                     <span>Your Score Share</span>
-                    <span>{sharePercentage(mScore, totalScore)}</span>
+                    <span>{sharePercentage(mScore, totalScore)} %</span>
                   </div>
                   <div className="info">
                     <span>Last Joined</span>
