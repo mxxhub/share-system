@@ -82,3 +82,8 @@ export const numberWithCommas = (x: number) => {
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return parts.join(".");
 };
+
+export const sharePercentage = (value: number, total: number) => {
+  if (total > 0) return ((value / total) * 100).toFixed(2);
+  return "---";
+};

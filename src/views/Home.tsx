@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { getStakeContract, getTokenContract } from "../blockchain";
 import Addresses from "../blockchain/abi/address.json";
 import eth_img from "../assets/images/eth.png";
-import { formatDate, numberWithCommas } from "../helper";
+import { formatDate, numberWithCommas, sharePercentage } from "../helper";
 import { HomeContainer, Main } from "./styles";
 
 export const Home = () => {
@@ -29,6 +29,7 @@ export const Home = () => {
   const [mScore, setMScore] = useState<number>(0);
   const [reward, setReward] = useState<number>(0);
   const [elapsedDays, setElapsedDays] = useState<number>(0);
+  const [totalScore, setTotalScore] = useState<number>(0);
   const [histories, setHistories] = useState<ClaimHistory[]>([]);
   const [lastUpdated, setLastUpdated] = useState<number>(0);
 
@@ -47,13 +48,13 @@ export const Home = () => {
         _holders,
         _totalStakedAmount,
         _unstakePenaltyPercent,
+        _totalScore,
       ] = await ca.getStakingInfo();
 
       const tknSymbol = await tknCA.symbol();
       setTokenSymbol(tknSymbol);
       const tknDecimals = await tknCA.decimals();
       setDecimals(tknDecimals);
-
       setAPYPerDay(_apyPerDay.toNumber() / 100);
       setLockPeriod(_lockPeriod.toNumber());
       setMinimumStakingAmount(Number(formatUnits(_minimumStakingAmount, 18)));
@@ -61,6 +62,7 @@ export const Home = () => {
       setTotalETH(Number(formatUnits(_totalETH, 18)));
       setHolders(_holders.toNumber());
       setTotalStakedAmount(Number(formatUnits(_totalStakedAmount, 18)));
+      setTotalScore(Number(formatUnits(_totalScore, 18)));
     } catch (err: any) {
       console.log("Fetch Staking Info Err: ", err);
     }
@@ -318,7 +320,7 @@ export const Home = () => {
                   </div>
                   <div className="info">
                     <span>Last Joined</span>
-                    <span>{formatDate(lastUpdated)}</span>
+                    <span>{formatDate(lastUpdated) || "---"}</span>
                   </div>
                 </div>
               </div>
@@ -411,12 +413,20 @@ export const Home = () => {
                     <span>{numberWithCommas(minimumClaimAmount)} ETH</span>
                   </div>
                   <div className="info">
+                    <span>Total Users Score</span>
+                    <span>{numberWithCommas(totalScore)}</span>
+                  </div>
+                  <div className="info">
                     <span>Current Score</span>
                     <span>{numberWithCommas(mScore)}</span>
                   </div>
                   <div className="info">
+                    <span>Your Score Share</span>
+                    <span>{sharePercentage(mScore, totalScore)}</span>
+                  </div>
+                  <div className="info">
                     <span>Last Joined</span>
-                    <span>{formatDate(lastUpdated)}</span>
+                    <span>{formatDate(lastUpdated) || "---"}</span>
                   </div>
                   <div className="info">
                     <span>Elapse Days</span>
