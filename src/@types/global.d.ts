@@ -10,7 +10,13 @@ declare interface INetwork {
   src: string;
 }
 
-interface ClaimHistory {
+declare interface ClaimHistory {
   amount: number;
   timestamp: number;
+}
+
+declare interface IMenuInterface {
+  id: number;
+  title: string;
+  link: string;
 }

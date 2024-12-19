@@ -1,10 +1,47 @@
 import styled from "styled-components";
+import { DrawerProps } from "../components/Drawer";
 
 export const HeaderStyle = styled.header`
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  .mobile-menu {
+    font-size: 42px;
+    color: white;
+    display: none;
+
+    &:hover {
+      cursor: pointer;
+      color: rgb(253, 218, 171);
+    }
+
+    @media screen and (max-width: 768px) {
+      display: flex;
+      z-index: 1000;
+    }
+  }
+
+  .menu-center {
+    display: flex;
+    flex-direction: row;
+    gap: 2rem;
+
+    @media screen and (max-width: 768px) {
+      display: none;
+    }
+
+    & h3 {
+      font-size: 16px;
+      font-weight: 300;
+
+      &:hover {
+        color: rgb(253, 218, 171);
+      }
+    }
+  }
+
   a {
     text-decoration: none;
     color: white;
@@ -13,16 +50,21 @@ export const HeaderStyle = styled.header`
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: 600;
     img {
       width: 40px;
       height: 40px;
     }
 
-    @media screen and (max-width: 960px) {
+    @media screen and (max-width: 1024px) {
       width: auto;
       span {
         display: none;
       }
+    }
+
+    @media screen and (max-width: 768px) {
+      display: none;
     }
   }
 
@@ -62,6 +104,7 @@ export const HomeContainer = styled.div`
   width: 100%;
   padding-top: 30px;
   min-height: 100vh;
+
   .flex {
     width: 100%;
     display: flex;
@@ -158,6 +201,7 @@ export const Main = styled.div`
   height: 100%;
 
   .connect-wallet {
+    margin-top: 50px;
     font-size: 20px;
     background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
     color: white;
@@ -182,27 +226,28 @@ export const Main = styled.div`
       border: 1px solid var(--pink);
       border-radius: 20px;
       display: flex;
-      flex: 1 33.33%;
+      flex: 1 calc(33.33% - 30px);
       flex-direction: column;
       justify-content: space-between;
       align-items: left;
 
       & h1 {
-        font-size: 2.5rem;
-        @media screen and (max-width: 960px) {
-          font-size: 2.5rem;
+        font-size: 2rem;
+
+        @media screen and (max-width: 1024px) {
+          font-size: 2.3rem;
         }
 
-        @media screen and (max-width: 576px) {
+        @media screen and (max-width: 768px) {
           font-size: 2rem;
         }
       }
 
-      @media screen and (max-width: 960px) {
-        flex: 1 50%;
+      @media screen and (max-width: 1024px) {
+        flex: 1 calc(50% - 50px);
       }
 
-      @media screen and (max-width: 576px) {
+      @media screen and (max-width: 768px) {
         flex: 1 100%;
       }
     }
@@ -463,6 +508,63 @@ export const Main = styled.div`
     @media screen and (max-width: 768px) {
       width: calc(100% - 40px);
       margin: 0 20px;
+    }
+  }
+`;
+
+export const DrawerContainer = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "isOpen",
+})<DrawerProps>`
+  position: fixed;
+  top: 0;
+  transform: ${(props) =>
+    props?.isOpen ? "translateX(100%)" : "translateX(-100%)"};
+  transition: all 0.7s ease-in-out;
+  right: 100%;
+  width: 100vw;
+  height: 100vh;
+  background-color: #04091e;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  z-index: 1000;
+
+  .mobile-header {
+    width: calc(100% - 70px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .mobile-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      & h2 {
+        color: white;
+        font-size: 20px;
+      }
+    }
+
+    .close {
+      font-size: 24px;
+      color: white;
+
+      &:hover {
+        cursor: pointer;
+        color: rgb(253, 218, 171);
+      }
+    }
+  }
+
+  & h3 {
+    font-size: 16px;
+    font-weight: 300;
+
+    &:hover {
+      color: rgb(253, 218, 171);
     }
   }
 `;
