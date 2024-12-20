@@ -1,7 +1,7 @@
 #root {
   width: 100vw;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 6rem;
   text-align: center;
   --dark-blue: #000618;
   --light-blue: #0194fe;
@@ -21,6 +21,18 @@
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  #root {
+    padding: 2rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  #root {
+    padding: 2rem 1rem;
   }
 }
 

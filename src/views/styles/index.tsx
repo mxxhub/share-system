@@ -210,13 +210,74 @@ export const Main = styled.div`
     border-radius: 40px;
   }
 
+  .divider {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      120deg,
+      rgb(73, 14, 75),
+      rgb(73, 14, 75),
+      rgb(114, 43, 85),
+      rgb(114, 43, 85),
+      rgb(4, 72, 150),
+      rgb(4, 72, 150),
+      rgb(114, 43, 85),
+      rgb(114, 43, 85),
+      rgb(4, 72, 150),
+      rgb(4, 72, 150),
+      rgb(73, 14, 75),
+      rgb(73, 14, 75)
+    );
+    background-size: 700% 100%; /* Adjust for smoother movement */
+    animation: gradient-slide 5s linear infinite;
+    border: none;
+  }
+
+  .welcome {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+
+    .text-gradient {
+      font-size: 50px;
+      font-weight: bold;
+      background: -webkit-linear-gradient(
+        120deg,
+        rgb(0, 21, 206),
+        rgb(199, 15, 129),
+        rgb(54, 72, 238),
+        rgb(226, 12, 144)
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  }
+
+  @keyframes gradient-slide {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .title {
+    font-size: 40px;
+    font-weight: 600;
+  }
+
+  .subtitle {
+  }
+
   .static-info {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     flex: auto;
-    gap: 20px;
     .info {
       background: linear-gradient(
         120deg,
@@ -226,25 +287,19 @@ export const Main = styled.div`
       border: 1px solid var(--pink);
       border-radius: 20px;
       display: flex;
-      flex: 1 calc(33.33% - 30px);
+      height: 200px;
+      margin: 40px;
+      padding: 30px;
+      flex: 1 calc(40% - 20px);
       flex-direction: column;
       justify-content: space-between;
-      align-items: left;
 
       & h1 {
         font-size: 2rem;
 
-        @media screen and (max-width: 1024px) {
-          font-size: 2.3rem;
-        }
-
         @media screen and (max-width: 768px) {
           font-size: 2rem;
         }
-      }
-
-      @media screen and (max-width: 1024px) {
-        flex: 1 calc(50% - 50px);
       }
 
       @media screen and (max-width: 768px) {
@@ -264,7 +319,7 @@ export const Main = styled.div`
     );
     border-radius: 20px;
     gap: 30px;
-    padding: 40px;
+    padding: 20px 30px;
     border: 1px solid var(--pink);
 
     & > div:first-of-type {

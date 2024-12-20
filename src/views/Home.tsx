@@ -6,7 +6,12 @@ import { toast } from "react-toastify";
 import { getStakeContract, getTokenContract } from "../blockchain";
 import Addresses from "../blockchain/abi/address.json";
 import eth_img from "../assets/images/eth.png";
-import { formatDate, numberWithCommas, sharePercentage } from "../helper";
+import {
+  formatAddress,
+  formatDate,
+  numberWithCommas,
+  sharePercentage,
+} from "../helper";
 import { HomeContainer, Main } from "./styles";
 
 export const Home = () => {
@@ -34,6 +39,7 @@ export const Home = () => {
   const [lastUpdated, setLastUpdated] = useState<number>(0);
 
   const tokenPrice = 0.0027;
+  const totalSupply = 72000000;
 
   const getGlobalValues = async () => {
     try {
@@ -249,20 +255,24 @@ export const Home = () => {
         <h1>Swap AI Revenue Share Program</h1>
         <div className="static-info">
           <div className="info">
-            <h1>Total Joiners</h1>
-            <h1>{numberWithCommas(holders)}</h1>
-          </div>
-          <div className="info">
-            <h1>Total Distributed</h1>
+            <h1>Total Revenue Shared</h1>
             <h1>{numberWithCommas(totalETH)} ETH</h1>
           </div>
           <div className="info">
-            <h1>Total Joined</h1>
-            <h1>{numberWithCommas(totalStakedAmount)}</h1>
+            <h1>Total Value Locked (TVL)</h1>
+            <h1>${numberWithCommas(totalStakedAmount * tokenPrice)}</h1>
           </div>
           <div className="info">
-            <h1>TVL</h1>
-            <h1>${numberWithCommas(totalStakedAmount * tokenPrice)}</h1>
+            <h1>Total Participants</h1>
+            <h1>{numberWithCommas(holders)} Wallets</h1>
+          </div>
+          <div className="info">
+            <h1>Total Supply Locked (TSL)</h1>
+            <h1>{sharePercentage(totalStakedAmount, totalSupply)} %</h1>
+          </div>
+          {/* <div className="info">
+            <h1>Total Joined</h1>
+            <h1>{numberWithCommas(totalStakedAmount)}</h1>
           </div>
           <div className="info">
             <h1>APY Per Minute</h1>
@@ -271,11 +281,26 @@ export const Home = () => {
           <div className="info">
             <h1>Lock Period</h1>
             <h1>{lockPeriod} minutes </h1>
-          </div>
+          </div> */}
         </div>
 
         {isConnected && address ? (
           <>
+            <hr className="divider" />
+            <div className="welcome">
+              <h1>Welcome</h1>
+              <span className="text-gradient">{formatAddress(address)}</span>
+            </div>
+            <div className="static-info">
+              <div className="info">
+                <h1>Your Rev Score</h1>
+                <h1>{numberWithCommas(mScore)} Points</h1>
+              </div>
+              <div className="info">
+                <h1>Your Rev Share</h1>
+                <h1>{sharePercentage(mScore, totalScore)} %</h1>
+              </div>
+            </div>
             <h2>Join Revenue Share Program</h2>
             <section>
               <div className="flex input-box">
