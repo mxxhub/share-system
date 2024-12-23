@@ -191,14 +191,17 @@ export const HomeContainer = styled.div`
 `;
 
 export const Main = styled.div`
-  width: 100vw;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   color: white;
   width: 100%;
   height: 100%;
+  & > h1 {
+    font-size: 2.3em;
+  }
 
   .connect-wallet {
     margin-top: 50px;
@@ -239,9 +242,12 @@ export const Main = styled.div`
     align-items: center;
     gap: 20px;
     flex-wrap: wrap;
+    & h1 {
+      font-size: 2.3em;
+    }
 
     .text-gradient {
-      font-size: 50px;
+      font-size: 2.3em;
       font-weight: bold;
       background: -webkit-linear-gradient(
         120deg,
@@ -269,15 +275,21 @@ export const Main = styled.div`
     font-weight: 600;
   }
 
-  .subtitle {
-  }
-
   .static-info {
-    width: 100%;
+    position: relative;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
     flex: auto;
+    padding: 0 40px;
+
+    @media screen and (max-width: 1024px) {
+      padding: 0 20px;
+    }
+
+    @media screen and (max-width: 768px) {
+      padding: 0 10px;
+    }
     .info {
       background: linear-gradient(
         120deg,
@@ -287,23 +299,26 @@ export const Main = styled.div`
       border: 1px solid var(--pink);
       border-radius: 20px;
       display: flex;
-      height: 200px;
-      margin: 40px;
+      height: 180px;
+      margin: 30px;
       padding: 30px;
-      flex: 1 calc(40% - 20px);
+      flex: 1 calc(33.33% - 10px);
       flex-direction: column;
       justify-content: space-between;
 
       & h1 {
-        font-size: 2rem;
+        font-size: 1.3em;
+        line-height: 1.5em;
+      }
 
-        @media screen and (max-width: 768px) {
-          font-size: 2rem;
-        }
+      @media screen and (max-width: 1024px) {
+        flex: 1 calc(33.33% - 10px);
+        margin: 15px;
       }
 
       @media screen and (max-width: 768px) {
         flex: 1 100%;
+        margin: 10px;
       }
     }
   }
@@ -440,8 +455,17 @@ export const Main = styled.div`
             }
 
             & > span:first-of-type {
-              padding: 5px 15px;
+              padding: 5px 10px;
+              font-size: 16px;
               color: gray;
+            }
+
+            & .balance {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              gap: 5px;
+              padding: 5px 10px;
               &:hover {
                 cursor: pointer;
                 color: white;
@@ -452,7 +476,6 @@ export const Main = styled.div`
 
             & span:last-of-type {
               color: gray;
-              padding-right: 15px;
             }
 
             @media screen and (max-width: 960px) {

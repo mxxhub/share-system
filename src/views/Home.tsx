@@ -37,6 +37,12 @@ export const Home = () => {
   const [totalScore, setTotalScore] = useState<number>(0);
   const [histories, setHistories] = useState<ClaimHistory[]>([]);
   const [lastUpdated, setLastUpdated] = useState<number>(0);
+  const [mETH, setMETH] = useState<number>(0);
+  const [joinText, setJoinText] = useState<
+    | "Join"
+    | "2 Levels Wallet Confirm [Step 1]"
+    | "2 Levels Wallet Confirm [Step 2]"
+  >("Join");
 
   const tokenPrice = 0.0027;
   const totalSupply = 72000000;
@@ -93,6 +99,7 @@ export const Home = () => {
             : Number(formatUnits(_score, 18))
         );
         setLastUpdated(_user.lastUpdated.toNumber());
+        let _mETH = Number(formatUnits(_user.reward, 18));
         let arr: ClaimHistory[] = [];
         for (let i = 0; i < _user.histories.length; i++) {
           const history = _user.histories[i];
@@ -100,8 +107,10 @@ export const Home = () => {
             amount: Number(formatUnits(history.amount, 18)),
             timestamp: history.timestamp.toNumber(),
           });
+          _mETH += Number(formatUnits(history.amount, 18));
         }
         setHistories(arr.reverse());
+        setMETH(Number(_mETH.toFixed(3)));
       }
     } catch (err: any) {
       if (err.message.includes("User is not a holder")) {
@@ -154,8 +163,10 @@ export const Home = () => {
         const ca = await getStakeContract(signer);
         const token = await getTokenContract(signer);
         const _amount = parseUnits(amount, decimals);
+        setJoinText("2 Levels Wallet Confirm [Step 1]");
         const tx = await token.approve(Addresses.stake, _amount);
         await tx.wait();
+        setJoinText("2 Levels Wallet Confirm [Step 2]");
         const tx2 = await ca.stake(_amount);
         await tx2.wait();
         if (tx2) {
@@ -164,11 +175,13 @@ export const Home = () => {
           await getMyInfo();
           resetValues();
         }
+        setJoinText("Join");
       } else {
         toast.error("Invalid amount", { theme: "colored" });
       }
     } catch (Err: any) {
       resetValues();
+      setJoinText("Join");
       if (Err.message.includes("Below minimum joining amount")) {
         return toast.error("Below minimum joining amount!", {
           theme: "colored",
@@ -270,18 +283,6 @@ export const Home = () => {
             <h1>Total Supply Locked (TSL)</h1>
             <h1>{sharePercentage(totalStakedAmount, totalSupply)} %</h1>
           </div>
-          {/* <div className="info">
-            <h1>Total Joined</h1>
-            <h1>{numberWithCommas(totalStakedAmount)}</h1>
-          </div>
-          <div className="info">
-            <h1>APY Per Minute</h1>
-            <h1>{apyPerDay} %</h1>
-          </div>
-          <div className="info">
-            <h1>Lock Period</h1>
-            <h1>{lockPeriod} minutes </h1>
-          </div> */}
         </div>
 
         {isConnected && address ? (
@@ -300,7 +301,18 @@ export const Home = () => {
                 <h1>Your Rev Share</h1>
                 <h1>{sharePercentage(mScore, totalScore)} %</h1>
               </div>
+              <div className="info">
+                <h1>Your Total Revenue</h1>
+                <h1>{mETH} ETH</h1>
+              </div>
+              <div className="info">
+                <h1>Your Program Tokens</h1>
+                <h1>
+                  {mStakedAmount} {tokenSymbol}
+                </h1>
+              </div>
             </div>
+            <hr className="divider" />
             <h2>Join Revenue Share Program</h2>
             <section>
               <div className="flex input-box">
@@ -314,16 +326,10 @@ export const Home = () => {
                   />
                   <div className="flex">
                     <div className="flex">
-                      <span onClick={() => setInputStake(Number(mBalance))}>
-                        Balance
-                      </span>
+                      <span>Wallet Balance</span>
                       <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
+                        className="balance"
+                        onClick={() => setInputStake(Number(mBalance))}
                       >
                         <img src="logo.png" alt="icon" width={15} height={15} />
                         <span>{numberWithCommas(mBalance)}</span>
@@ -333,7 +339,7 @@ export const Home = () => {
                 </div>
                 <div className="swap-btn">
                   <button onClick={() => stake(inputStake.toString())}>
-                    Join
+                    {joinText}
                   </button>
                 </div>
 
@@ -347,10 +353,6 @@ export const Home = () => {
                     <span>{`${numberWithCommas(
                       minimumStakingAmount
                     )} ${tokenSymbol}`}</span>
-                  </div>
-                  <div className="info">
-                    <span>Last Joined</span>
-                    <span>{formatDate(lastUpdated) || "---"}</span>
                   </div>
                 </div>
               </div>
@@ -368,16 +370,10 @@ export const Home = () => {
                   />
                   <div className="flex">
                     <div className="flex">
-                      <span onClick={() => setInputUnstake(mStakedAmount)}>
-                        Balance
-                      </span>
+                      <span>Program Balance</span>
                       <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
+                        className="balance"
+                        onClick={() => setInputUnstake(mStakedAmount)}
                       >
                         <img src="logo.png" alt="icon" width={15} height={15} />
                         <span>{numberWithCommas(mStakedAmount)}</span>
@@ -389,18 +385,6 @@ export const Home = () => {
                   <button onClick={() => unstake(inputUnstake.toString())}>
                     Leave
                   </button>
-                </div>
-                <div className="stake-info">
-                  <div className="info">
-                    <span>Total Joined {tokenSymbol}</span>
-                    <span>
-                      {numberWithCommas(totalStakedAmount)} {tokenSymbol}
-                    </span>
-                  </div>
-                  <div className="info">
-                    <span>Current Score</span>
-                    <span>{numberWithCommas(mScore)}</span>
-                  </div>
                 </div>
               </div>
             </section>
@@ -418,14 +402,7 @@ export const Home = () => {
                   <div className="flex">
                     <div className="flex">
                       <span onClick={() => setInputClaim(reward)}>Balance</span>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 5,
-                        }}
-                      >
+                      <div className="balance">
                         <img src={eth_img} alt="icon" width={15} height={15} />
                         <span>{numberWithCommas(reward)}</span>
                       </div>
@@ -441,26 +418,6 @@ export const Home = () => {
                   <div className="info">
                     <span>Minimum Claim Amount</span>
                     <span>{numberWithCommas(minimumClaimAmount)} ETH</span>
-                  </div>
-                  <div className="info">
-                    <span>Total Users Score</span>
-                    <span>{numberWithCommas(totalScore)}</span>
-                  </div>
-                  <div className="info">
-                    <span>Current Score</span>
-                    <span>{numberWithCommas(mScore)}</span>
-                  </div>
-                  <div className="info">
-                    <span>Your Score Share</span>
-                    <span>{sharePercentage(mScore, totalScore)} %</span>
-                  </div>
-                  <div className="info">
-                    <span>Last Joined</span>
-                    <span>{formatDate(lastUpdated) || "---"}</span>
-                  </div>
-                  <div className="info">
-                    <span>Elapse Days</span>
-                    <span>{elapsedDays} minutes</span>
                   </div>
                 </div>
               </div>
@@ -480,7 +437,7 @@ export const Home = () => {
                 </div>
               ) : (
                 <div className="flex input-box">
-                  <h2>No Staked Data</h2>
+                  <h2>No revenue is claimed yet</h2>
                 </div>
               )}
             </section>
