@@ -4,13 +4,13 @@ import { ToastContainer } from "react-toastify";
 import App from "./App.tsx";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
-import { AppKitProvider } from "./wagmi/provider.tsx";
+import { WalletProvider } from "./wallet/provider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ToastContainer autoClose={3000} limit={3} pauseOnFocusLoss={false} />
-    <AppKitProvider>
+    <WalletProvider>
       <App />
-    </AppKitProvider>
+    </WalletProvider>
   </StrictMode>
 );

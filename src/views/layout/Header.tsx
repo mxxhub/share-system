@@ -1,29 +1,34 @@
-import {
-  useAppKit,
-  useAppKitAccount,
-  useDisconnect,
-} from "@reown/appkit/react";
 import { Link } from "react-router-dom";
 import { formatAddress } from "../../helper";
 import { HeaderStyle } from "../styles";
 import { menus } from "../../constants";
 import { IoReorderThreeSharp } from "react-icons/io5";
 import { Drawer } from "../components/Drawer";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { useConnectWallet } from "@web3-onboard/react";
+import Web3 from "web3";
 
 export const Header = () => {
-  const { open } = useAppKit();
-  const { address, isConnected } = useAppKitAccount();
-  const { disconnect } = useDisconnect();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const handleWallet = async () => {
-    if (isConnected) {
-      disconnect();
-    } else {
-      await open();
+  const [{ wallet }, connect, disconnect] = useConnectWallet();
+  const isConnected = wallet ? true : false;
+  const account = wallet ? wallet.accounts[0].address : "";
+
+  const connectWallet = useCallback(async () => {
+    const wallets = await connect();
+    if (wallets[0] != null) {
+      const web3 = new Web3(wallets[0].provider);
+      (window as any).provider = web3;
     }
-  };
+  }, [connect]);
+
+  const disconnectWallet = useCallback(async () => {
+    if (wallet) {
+      disconnect({ label: wallet.label });
+    }
+  }, [wallet, disconnect]);
+
   return (
     <HeaderStyle>
       <Link to="/" className="logo">
@@ -42,8 +47,11 @@ export const Header = () => {
         ))}
       </div>
       <div className="nav-right">
-        <button type="button" onClick={handleWallet}>
-          {address ? formatAddress(address) : "Connect Wallet"}
+        <button
+          type="button"
+          onClick={() => (isConnected ? disconnectWallet() : connectWallet())}
+        >
+          {isConnected ? formatAddress(account) : "Connect Wallet"}
         </button>
       </div>
       <Drawer isOpen={isOpen} onClose={() => setIsOpen(false)} />

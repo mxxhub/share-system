@@ -1,40 +1,15 @@
-import { ethers } from "ethers";
-import { provider, ethereum_provider } from "./providers";
-import Abis from "./abi/abis.json";
+import { getProvider, getWeb3 } from "./providers";
+import ABIs from "./abi/abis.json";
 import Addresses from "./abi/address.json";
 
-const getSigner = async (privatekey: string) => {
-  try {
-    let signer = new ethers.Wallet(privatekey, provider);
-    return signer;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
+export const getRevShareContract = (provider = false) => {
+  const web3 = provider ? getProvider() : getWeb3();
+  const revShareContract = new web3.eth.Contract(ABIs.Stake, Addresses.stake);
+  return revShareContract;
 };
 
-const getStakeContract = async (signer?: any) => {
-  const ca = new ethers.Contract(
-    Addresses.stake,
-    Abis.Stake,
-    signer || provider
-  );
-  return ca;
-};
-
-const getTokenContract = async (signer?: any) => {
-  const ca = new ethers.Contract(
-    Addresses.token,
-    Abis.ERC20,
-    signer || provider
-  );
-  return ca;
-};
-
-export {
-  getSigner,
-  provider,
-  ethereum_provider,
-  getStakeContract,
-  getTokenContract,
+export const getTokenContract = (provider = false) => {
+  const web3 = provider ? getProvider() : getWeb3();
+  const tokenContract = new web3.eth.Contract(ABIs.ERC20, Addresses.token);
+  return tokenContract;
 };

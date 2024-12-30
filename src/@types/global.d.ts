@@ -20,3 +20,10 @@ declare interface IMenuInterface {
   title: string;
   link: string;
 }
+
+declare interface IRenderer {
+  hours: string;
+  minutes: string;
+  seconds: string;
+  completed: boolean;
+}

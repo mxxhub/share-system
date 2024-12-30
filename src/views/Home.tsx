@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { useAppKitAccount } from "@reown/appkit/react";
-import { ethers } from "ethers";
 import { formatUnits, parseUnits } from "viem";
+import Countdown from "react-countdown";
 import { toast } from "react-toastify";
-import { getStakeContract, getTokenContract } from "../blockchain";
+import { getRevShareContract, getTokenContract } from "../blockchain";
 import Addresses from "../blockchain/abi/address.json";
 import eth_img from "../assets/images/eth.png";
 import {
@@ -13,15 +12,12 @@ import {
   sharePercentage,
 } from "../helper";
 import { HomeContainer, Main } from "./styles";
+import { useConnectWallet } from "@web3-onboard/react";
 
 export const Home = () => {
-  const { isConnected, address } = useAppKitAccount();
-
-  const [tokenSymbol, setTokenSymbol] = useState("");
-  const [decimals, setDecimals] = useState<number>(0);
+  const [tokenSymbol, setTokenSymbol] = useState<string>("");
   const [inputStake, setInputStake] = useState<number>(0);
   const [inputUnstake, setInputUnstake] = useState<number>(0);
-  const [inputClaim, setInputClaim] = useState<number>(0);
   const [apyPerDay, setAPYPerDay] = useState<number>(0);
   const [lockPeriod, setLockPeriod] = useState<number>(0);
   const [minimumStakingAmount, setMinimumStakingAmount] = useState<number>(0);
@@ -33,10 +29,9 @@ export const Home = () => {
   const [mBalance, setMBalance] = useState<number>(0);
   const [mScore, setMScore] = useState<number>(0);
   const [reward, setReward] = useState<number>(0);
-  const [elapsedDays, setElapsedDays] = useState<number>(0);
+  const [lastUpdated, setLastUpdated] = useState<number>(0);
   const [totalScore, setTotalScore] = useState<number>(0);
   const [histories, setHistories] = useState<ClaimHistory[]>([]);
-  const [lastUpdated, setLastUpdated] = useState<number>(0);
   const [mETH, setMETH] = useState<number>(0);
   const [joinText, setJoinText] = useState<
     | "Join"
@@ -47,34 +42,29 @@ export const Home = () => {
   const tokenPrice = 0.0027;
   const totalSupply = 72000000;
 
+  const [{ wallet }] = useConnectWallet();
+  const isConnected = wallet ? true : false;
+  const account = wallet ? wallet.accounts[0].address : "";
+
   const getGlobalValues = async () => {
     try {
-      const ca = await getStakeContract();
-      const tknCA = await getTokenContract();
-      const [
-        _apyPerDay,
-        _lockPeriod,
-        _minimumStakingAmount,
-        _minimumClaimAmount,
-        _totalETH,
-        _holders,
-        _totalStakedAmount,
-        _unstakePenaltyPercent,
-        _totalScore,
-      ] = await ca.getStakingInfo();
+      const readRevContract = await getRevShareContract(false);
+      const readTokenContract = await getTokenContract(false);
+      const response = await readRevContract.methods.getStakingInfo().call();
 
-      const tknSymbol = await tknCA.symbol();
-      setTokenSymbol(tknSymbol);
-      const tknDecimals = await tknCA.decimals();
-      setDecimals(tknDecimals);
-      setAPYPerDay(_apyPerDay.toNumber() / 100);
-      setLockPeriod(_lockPeriod.toNumber());
-      setMinimumStakingAmount(Number(formatUnits(_minimumStakingAmount, 18)));
-      setMinimumClaimAmount(Number(formatUnits(_minimumClaimAmount, 18)));
-      setTotalETH(Number(formatUnits(_totalETH, 18)));
-      setHolders(_holders.toNumber());
-      setTotalStakedAmount(Number(formatUnits(_totalStakedAmount, 18)));
-      setTotalScore(Number(formatUnits(_totalScore, 18)));
+      const tknSymbol = await readTokenContract.methods.symbol().call();
+      setTokenSymbol(String(tknSymbol));
+
+      if (response) {
+        setAPYPerDay(Number(response[0]) / 100);
+        setLockPeriod(Number(response[1]));
+        setMinimumStakingAmount(Number(formatUnits(response[2], 18)));
+        setMinimumClaimAmount(Number(formatUnits(response[3], 18)));
+        setTotalETH(Number(formatUnits(response[4], 18)));
+        setHolders(Number(response[5]));
+        setTotalStakedAmount(Number(formatUnits(response[6], 18)));
+        setTotalScore(Number(formatUnits(response[8], 18)));
+      }
     } catch (err: any) {
       console.log("Fetch Staking Info Err: ", err);
     }
@@ -82,35 +72,44 @@ export const Home = () => {
 
   const getMyInfo = async () => {
     try {
-      if (!address || !isConnected) return;
-      const tknCA = await getTokenContract();
-      const balance = await tknCA.balanceOf(address);
-      setMBalance(Number(formatUnits(balance, 18)));
-      const ca = await getStakeContract();
-      const [_user, _score, _elapseDays] = await ca.getStakerInfo(address);
-      if (Number(formatUnits(_user.amount, 18)) > 0) {
-        setMStakedAmount(Number(formatUnits(_user.amount, 18)));
-        setReward(Number(formatUnits(_user.reward, 18)));
-        setElapsedDays(_elapseDays.toNumber());
-        setMScore(
-          _elapseDays.toNumber() > lockPeriod
-            ? Number(formatUnits(_score, 18)) +
-                Number(formatUnits(_user.amount, 18))
-            : Number(formatUnits(_score, 18))
-        );
-        setLastUpdated(_user.lastUpdated.toNumber());
-        let _mETH = Number(formatUnits(_user.reward, 18));
-        let arr: ClaimHistory[] = [];
-        for (let i = 0; i < _user.histories.length; i++) {
-          const history = _user.histories[i];
-          arr.push({
-            amount: Number(formatUnits(history.amount, 18)),
-            timestamp: history.timestamp.toNumber(),
-          });
-          _mETH += Number(formatUnits(history.amount, 18));
+      if (!account || !isConnected) return;
+      const readRevContract = await getRevShareContract(false);
+      const readTokenContract = await getTokenContract(false);
+
+      const balance = await readTokenContract.methods.balanceOf(account).call();
+      if (balance && typeof balance === "bigint")
+        setMBalance(Number(formatUnits(balance, 18)));
+
+      const stakerInfo = await readRevContract.methods
+        .getStakerInfo(account)
+        .call();
+      if (stakerInfo) {
+        if (Number(formatUnits(stakerInfo[0][1], 18)) > 0) {
+          setMStakedAmount(Number(formatUnits(stakerInfo[0][1], 18)));
+          setReward(Number(formatUnits(stakerInfo[0][3], 18)));
+          setLastUpdated(Number(stakerInfo[0][2]));
+          console.log("TimeStamp:", Number(stakerInfo[0][2]));
+          setMScore(
+            Number(stakerInfo[2]) > lockPeriod
+              ? Number(formatUnits(stakerInfo[1], 18)) +
+                  Number(formatUnits(stakerInfo[0][1], 18))
+              : Number(formatUnits(stakerInfo[1], 18))
+          );
+
+          let _mETH = Number(formatUnits(stakerInfo[0][3], 18));
+          let arr: ClaimHistory[] = [];
+          let keys = Object.keys(stakerInfo[0][4]);
+          for (let i = 0; i < keys.length; i++) {
+            console.log("Hi", stakerInfo[0][4][i], typeof stakerInfo[0][4][i]);
+            arr.push({
+              amount: Number(formatUnits(stakerInfo[0][4][i][0], 18)),
+              timestamp: Number(stakerInfo[0][4][i][1]),
+            });
+            _mETH += Number(formatUnits(stakerInfo[0][4][i][0], 18));
+          }
+          setHistories(arr);
+          setMETH(Number(_mETH.toFixed(3)));
         }
-        setHistories(arr.reverse());
-        setMETH(Number(_mETH.toFixed(3)));
       }
     } catch (err: any) {
       if (err.message.includes("User is not a holder")) {
@@ -132,25 +131,25 @@ export const Home = () => {
     async function getUserInfo() {
       await getMyInfo();
     }
-    if (isConnected && address) {
+    if (isConnected && account) {
       getUserInfo();
     }
-  }, [address, isConnected]);
+  }, [account, isConnected]);
 
   const resetValues = () => {
     setInputStake(0);
     setInputUnstake(0);
-    setInputClaim(0);
   };
 
-  const stake = async (amount: string) => {
+  const stake = async (amount: number) => {
     try {
-      if (!isConnected || !address) {
+      if (!isConnected || !account) {
         return toast.error("Please connect your wallet first", {
           theme: "colored",
         });
       }
-      if (mBalance < Number(amount)) {
+
+      if (mBalance < amount) {
         return toast.error(
           `Balance error. Your balance is ${mBalance} ${tokenSymbol}`,
           { theme: "colored" }
@@ -158,28 +157,35 @@ export const Home = () => {
       }
 
       if (Number(amount) > 0) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum!);
-        const signer = provider.getSigner();
-        const ca = await getStakeContract(signer);
-        const token = await getTokenContract(signer);
-        const _amount = parseUnits(amount, decimals);
         setJoinText("2 Levels Wallet Confirm [Step 1]");
-        const tx = await token.approve(Addresses.stake, _amount);
-        await tx.wait();
+        const readTokenContract = await getTokenContract(true);
+
+        const approveTx = await readTokenContract.methods
+          .approve(Addresses.stake, parseUnits(amount.toString(), 18))
+          .send({ from: account });
+        console.log("🚀 ~ stake ~ account:", account);
+
+        console.log("🚀 ~ stake ~ approveTx:", approveTx);
         setJoinText("2 Levels Wallet Confirm [Step 2]");
-        const tx2 = await ca.stake(_amount);
-        await tx2.wait();
-        if (tx2) {
+
+        const writeRevContract = await getRevShareContract(true);
+
+        const tx = await writeRevContract.methods
+          .AddRevShare(parseUnits(amount.toString(), 18))
+          .send({ from: account });
+
+        if (tx) {
           toast.success("Joined successfully!", { theme: "colored" });
+          resetValues();
           await getGlobalValues();
           await getMyInfo();
-          resetValues();
         }
-        setJoinText("Join");
       } else {
         toast.error("Invalid amount", { theme: "colored" });
       }
+      setJoinText("Join");
     } catch (Err: any) {
+      console.log({ Err });
       resetValues();
       setJoinText("Join");
       if (Err.message.includes("Below minimum joining amount")) {
@@ -194,23 +200,24 @@ export const Home = () => {
 
   const unstake = async (amount: string) => {
     try {
-      if (!isConnected || !address) {
+      if (!isConnected || !account) {
         return toast.error("Please connect your wallet first", {
           theme: "colored",
         });
       }
 
       if (Number(amount) > 0) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum!);
-        const signer = provider.getSigner();
-        const ca = await getStakeContract(signer);
-        const tx = await ca.unstake(parseUnits(amount, decimals));
-        await tx.wait();
+        const writeRevContract = await getRevShareContract(true);
+
+        const tx = await writeRevContract.methods
+          .RemoveRevShare(parseUnits(amount, 18))
+          .send({ from: account });
+
         if (tx) {
           toast.success("Left successfully!", { theme: "colored" });
+          resetValues();
           await getGlobalValues();
           await getMyInfo();
-          resetValues();
         }
       } else {
         return toast.warning("Invalid leaving amount!", { theme: "colored" });
@@ -227,27 +234,30 @@ export const Home = () => {
     }
   };
 
-  const claimReward = async (amount: string) => {
+  const claimReward = async () => {
     try {
-      if (!isConnected || !address) {
+      if (!isConnected || !account) {
         return toast.error("Please connect your wallet first", {
           theme: "colored",
         });
       }
 
-      if (Number(amount) > 0) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum!);
-        const signer = provider.getSigner();
-        const ca = await getStakeContract(signer);
-        const tx = await ca.claim(parseUnits(amount, 18));
-        await tx.wait();
-        if (tx) {
-          toast.success("Claimed successfully!", { theme: "colored" });
-          await getMyInfo();
-          resetValues();
-        }
-      } else {
-        return toast.warning("Invalid claim amount!", { theme: "colored" });
+      if (reward < minimumClaimAmount) {
+        return toast.warning("Your reward is not enough to claim!", {
+          theme: "colored",
+        });
+      }
+      const writeRevContract = await getRevShareContract(true);
+
+      const tx = await writeRevContract.methods
+        .Claim(parseUnits(reward.toString(), 18))
+        .send({ from: account });
+
+      if (tx) {
+        toast.success("Claimed successfully!", { theme: "colored" });
+        resetValues();
+        await getGlobalValues();
+        await getMyInfo();
       }
     } catch (Err: any) {
       resetValues();
@@ -262,6 +272,7 @@ export const Home = () => {
       }
     }
   };
+
   return (
     <HomeContainer>
       <Main>
@@ -285,12 +296,12 @@ export const Home = () => {
           </div>
         </div>
 
-        {isConnected && address ? (
+        {isConnected && account ? (
           <>
             <hr className="divider" />
             <div className="welcome">
               <h1>Welcome</h1>
-              <span className="text-gradient">{formatAddress(address)}</span>
+              <span className="text-gradient">{formatAddress(account)}</span>
             </div>
             <div className="static-info">
               <div className="info">
@@ -338,12 +349,22 @@ export const Home = () => {
                   </div>
                 </div>
                 <div className="swap-btn">
-                  <button onClick={() => stake(inputStake.toString())}>
-                    {joinText}
-                  </button>
+                  <button onClick={() => stake(inputStake)}>{joinText}</button>
                 </div>
 
                 <div className="stake-info">
+                  <div className="info">
+                    <span>Cool Down Period</span>
+                    {Date.now() <
+                    lastUpdated * 1000 + lockPeriod * 60 * 1000 ? (
+                      <Countdown
+                        date={lastUpdated * 1000 + lockPeriod * 60 * 1000}
+                        onComplete={async () => await getMyInfo()}
+                      />
+                    ) : (
+                      <span>N/A</span>
+                    )}
+                  </div>
                   <div className="info">
                     <span>APY Per Minute</span>
                     <span>{apyPerDay}%</span>
@@ -391,27 +412,14 @@ export const Home = () => {
             <h2>Revenue Earned</h2>
             <section>
               <div className="flex input-box">
-                <div className="flex stake">
-                  <input
-                    type="number"
-                    placeholder="0.0"
-                    min={0}
-                    value={inputClaim}
-                    onChange={(e) => setInputClaim(Number(e.target.value))}
-                  />
-                  <div className="flex">
-                    <div className="flex">
-                      <span onClick={() => setInputClaim(reward)}>Balance</span>
-                      <div className="balance">
-                        <img src={eth_img} alt="icon" width={15} height={15} />
-                        <span>{numberWithCommas(reward)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
                 <div className="swap-btn">
-                  <button onClick={() => claimReward(inputClaim.toString())}>
-                    Claim
+                  <button onClick={claimReward}>
+                    <span>
+                      Claim (
+                      <img src={eth_img} width={20} height={20} />
+                      &nbsp;
+                      {numberWithCommas(reward)})
+                    </span>
                   </button>
                 </div>
                 <div className="stake-info">

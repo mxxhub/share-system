@@ -557,6 +557,7 @@ export const Main = styled.div`
     .swap-btn {
       width: 100%;
       justify-content: center;
+      align-items: center;
       button {
         width: 100%;
         background: linear-gradient(90deg, #6020a0 0%, #006fee 100%);
@@ -567,6 +568,11 @@ export const Main = styled.div`
         outline: none;
         font-size: 20px;
         border: none;
+        & span {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
 
         &:hover {
           opacity: 0.8;
